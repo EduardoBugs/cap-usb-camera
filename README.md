@@ -97,7 +97,7 @@ Then you can have the exit reason inside `exit_code`. Available values are:
 ### getPhoto(...)
 
 ```typescript
-getPhoto(config?: UsbCameraPhotoOptions) => any
+getPhoto(config?: UsbCameraPhotoOptions) => Promise<UsbCameraResult>
 ```
 
 Open native activity and get photo from usb camera device attached to the phone.
@@ -107,19 +107,12 @@ If there is no usb device connected, will return canceled exit code.
 | ------------ | ----------------------------------------------------------------------- |
 | **`config`** | <code><a href="#usbcameraphotooptions">UsbCameraPhotoOptions</a></code> |
 
-**Returns:** <code>any</code>
+**Returns:** <code>Promise&lt;<a href="#usbcameraresult">UsbCameraResult</a>&gt;</code>
 
 --------------------
 
 
 ### Interfaces
-
-
-#### UsbCameraPhotoOptions
-
-| Prop                | Type                 | Description                                        |
-| ------------------- | -------------------- | -------------------------------------------------- |
-| **`saveToStorage`** | <code>boolean</code> | Let app save captured photo to the device storage. |
 
 
 #### UsbCameraResult
@@ -130,6 +123,13 @@ If there is no usb device connected, will return canceled exit code.
 | **`status_code_s`** | <code>string</code>                                  | Description string of the status code number.                                                  |
 | **`exit_code`**     | <code>string</code>                                  | Description of exit or cancel reason.                                                          |
 | **`data`**          | <code>{ dataURL?: string; fileURI?: string; }</code> | Result data payload, contains image in base64 DataURL, and Android filesystem URI to the file. |
+
+
+#### UsbCameraPhotoOptions
+
+| Prop                | Type                 | Description                                        |
+| ------------------- | -------------------- | -------------------------------------------------- |
+| **`saveToStorage`** | <code>boolean</code> | Let app save captured photo to the device storage. |
 
 </docgen-api>
 

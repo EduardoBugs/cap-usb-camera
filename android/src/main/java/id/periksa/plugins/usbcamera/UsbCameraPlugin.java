@@ -30,17 +30,17 @@ import java.util.List;
 @CapacitorPlugin(name = "UsbCamera", permissions = {
         @Permission(strings = {Manifest.permission.CAMERA}, alias = UsbCameraPlugin.PERM_CAMERA),
         @Permission(strings = {Manifest.permission.READ_EXTERNAL_STORAGE}, alias = UsbCameraPlugin.PERM_READ_EXT_STORAGE),
-        @Permission(strings = {Manifest.permission.WRITE_EXTERNAL_STORAGE}, alias = UsbCameraPlugin.PERM_WRITE_EXT_STORAGE)
+        @Permission(strings = {Manifest.permission.READ_MEDIA_IMAGES}, alias = UsbCameraPlugin.PERM_READ_MEDIA_IMAGES)
 })
 public class UsbCameraPlugin extends Plugin {
 
     static final String PERM_CAMERA = "camera";
     static final String PERM_READ_EXT_STORAGE = "r_ext";
-    static final String PERM_WRITE_EXT_STORAGE = "w_ext";
+    static final String PERM_READ_MEDIA_IMAGES = "r_media";
 
     private static final String TAG = "PluginBridgeDebug";
     private static final String[] REQUIRED_PERMISSION_ALIASES = new String[]{
-            PERM_CAMERA, PERM_READ_EXT_STORAGE, PERM_WRITE_EXT_STORAGE
+            PERM_CAMERA, PERM_READ_EXT_STORAGE, PERM_READ_MEDIA_IMAGES
     };
 
     private final List<String> mMissPermissions = new ArrayList<>();
@@ -59,33 +59,56 @@ public class UsbCameraPlugin extends Plugin {
 
     private boolean checkAndRequestPermissions(PluginCall call) {
         mMissPermissions.clear();
-        for (String permission : REQUIRED_PERMISSION_ALIASES) {
-            boolean permissionGranted = getPermissionState(permission) == PermissionState.GRANTED;
-            if (!permissionGranted) {
-                mMissPermissions.add(permission);
+
+        // Sempre requer CAMERA
+        if (getPermissionState(PERM_CAMERA) != PermissionState.GRANTED) {
+            mMissPermissions.add(PERM_CAMERA);
+        }
+
+        // A permissão correta depende da versão do Android
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            // Android 13+ usa READ_MEDIA_IMAGES
+            if (getPermissionState(PERM_READ_MEDIA_IMAGES) != PermissionState.GRANTED) {
+                mMissPermissions.add(PERM_READ_MEDIA_IMAGES);
+            }
+        } else {
+            // Android ≤ 12 usa READ_EXTERNAL_STORAGE
+            if (getPermissionState(PERM_READ_EXT_STORAGE) != PermissionState.GRANTED) {
+                mMissPermissions.add(PERM_READ_EXT_STORAGE);
             }
         }
 
         if (!mMissPermissions.isEmpty()) {
             requestPermissionForAliases(
-                    mMissPermissions.toArray(new String[mMissPermissions.size()]),
-                    call,
-                    "appPermissionCallback"
+                mMissPermissions.toArray(new String[0]),
+                call,
+                "appPermissionCallback"
             );
             return false;
         }
+
         return true;
     }
 
     @PermissionCallback
     private void appPermissionCallback(PluginCall call) {
         if (getPermissionState(PERM_CAMERA) != PermissionState.GRANTED) {
-            call.reject("User denied required permissions");
-            return;
-        } else if (getPermissionState(PERM_WRITE_EXT_STORAGE) != PermissionState.GRANTED) {
-            call.reject("User denied required permissions");
+            call.reject("Camera permission denied");
             return;
         }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (getPermissionState(PERM_READ_MEDIA_IMAGES) != PermissionState.GRANTED) {
+                call.reject("Read media images permission denied");
+                return;
+            }
+        } else {
+            if (getPermissionState(PERM_READ_EXT_STORAGE) != PermissionState.GRANTED) {
+                call.reject("Read external storage permission denied");
+                return;
+            }
+        }
+
         showIntent(call);
     }
 

@@ -26,6 +26,7 @@ package com.serenegiant.common;
 import android.Manifest;
 import android.app.Fragment;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -247,7 +248,7 @@ public class BaseFragment extends Fragment
 			if (Manifest.permission.RECORD_AUDIO.equals(permission)) {
 				showToast(com.serenegiant.common.R.string.permission_audio);
 			}
-			if (Manifest.permission.WRITE_EXTERNAL_STORAGE.equals(permission)) {
+			if (Manifest.permission.WRITE_EXTERNAL_STORAGE.equals(permission) && Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
 				showToast(com.serenegiant.common.R.string.permission_ext_storage);
 			}
 			if (Manifest.permission.INTERNET.equals(permission)) {
@@ -268,9 +269,16 @@ public class BaseFragment extends Fragment
 	 * @return true 拥有对外部存储的写入权限
 	 */
 	protected boolean checkPermissionWriteExternalStorage() {
+		if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
+			// Android 10+ não precisa dessa permissão
+			Log.i(TAG, "Ignorando WRITE_EXTERNAL_STORAGE em Android 10+");
+			return true;
+		}
+	
 		if (!PermissionCheck.hasWriteExternalStorage(getActivity())) {
 			MessageDialogFragmentV4.showDialog((FragmentActivity) getActivity(), REQUEST_PERMISSION_WRITE_EXTERNAL_STORAGE,
-				com.serenegiant.common.R.string.permission_title, com.serenegiant.common.R.string.permission_ext_storage_request,
+				com.serenegiant.common.R.string.permission_title,
+				com.serenegiant.common.R.string.permission_ext_storage_request,
 				new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE});
 			return false;
 		}

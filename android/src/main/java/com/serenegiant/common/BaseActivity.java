@@ -26,6 +26,7 @@ package com.serenegiant.common;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -275,6 +276,12 @@ public class BaseActivity extends AppCompatActivity
 	 * @return true 拥有对外部存储的写入权限
 	 */
 	protected boolean checkPermissionWriteExternalStorage() {
+		if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
+			// Android 10+ não precisa dessa permissão
+			Log.i(TAG, "Ignorando WRITE_EXTERNAL_STORAGE em Android 10+");
+			return true;
+		}
+	
 		if (!PermissionCheck.hasWriteExternalStorage(this)) {
 			MessageDialogFragmentV4.showDialog(this, REQUEST_PERMISSION_WRITE_EXTERNAL_STORAGE,
 				R.string.permission_title, R.string.permission_ext_storage_request,

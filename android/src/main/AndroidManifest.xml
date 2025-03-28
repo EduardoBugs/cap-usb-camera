@@ -1,12 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="id.periksa.plugins.usbcamera">
+    xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- Permissões para câmera -->
     <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
+    <!-- Permissões para acesso à mídia no Android 13+ -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
 
+    <!-- Compatibilidade com Android 12 ou inferior -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+
+    <!-- O WRITE_EXTERNAL_STORAGE é ignorado em Android 10+ (API 29+), então é opcional -->
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="28"
+        tools:replace="android:maxSdkVersion" />
+
+    <!-- Para suporte a dispositivos USB (como câmeras USB) -->
+    <uses-feature android:name="android.hardware.usb.host" />
+    <uses-feature android:name="android.hardware.camera.external" android:required="false" />
+
+    <!-- Versão mínima do OpenGL (pode ser necessário para renderizar prévias da câmera) -->
     <uses-feature
         android:glEsVersion="0x00020000"
         android:required="true" />
@@ -16,8 +33,7 @@
             android:name=".USBCameraActivity"
             android:configChanges="orientation"
             android:screenOrientation="portrait"
-            android:theme="@style/Theme.AppCompat.NoActionBar"
-        />
+            android:theme="@style/Theme.AppCompat.NoActionBar" />
     </application>
 
 </manifest>
